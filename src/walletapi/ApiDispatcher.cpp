@@ -213,23 +213,23 @@ ApiDispatcher::ApiDispatcher(
 
         /* Get the transactions starting at the given block, for 1000 blocks */
         .Get(
-            "/transactions/\\d+",
+            "/transactions/(\\d+)",
             router(&ApiDispatcher::getTransactionsFromHeight, WalletMustBeOpen, viewWalletsAllowed))
 
         /* Get the transactions starting at the given block, and ending at the given block */
         .Get(
-            "/transactions/\\d+/\\d+",
+            "/transactions/(\\d+)/(\\d+)",
             router(&ApiDispatcher::getTransactionsFromHeightToHeight, WalletMustBeOpen, viewWalletsAllowed))
 
         /* Get the transactions starting at the given block, for 1000 blocks, belonging to the given address */
         .Get(
-            "/transactions/address/" + ApiConstants::addressRegex + "/\\d+",
+            "/transactions/address/" + ApiConstants::addressRegex+ "/(\\d+)",
             router(&ApiDispatcher::getTransactionsFromHeightWithAddress, WalletMustBeOpen, viewWalletsAllowed))
 
         /* Get the transactions starting at the given block, and ending at the given block, belonging to the given
            address */
         .Get(
-            "/transactions/address/" + ApiConstants::addressRegex + "/\\d+/\\d+",
+            "/transactions/address/" + ApiConstants::addressRegex + "/(\\d+)" + "/(\\d+)",
             router(&ApiDispatcher::getTransactionsFromHeightToHeightWithAddress, WalletMustBeOpen, viewWalletsAllowed))
 
         /* Get the transaction private key for the given hash */
@@ -999,7 +999,7 @@ std::tuple<Error, uint16_t> ApiDispatcher::closeWallet(const httplib::Request &r
 std::tuple<Error, uint16_t> ApiDispatcher::deleteAddress(const httplib::Request &req, httplib::Response &res, const nlohmann::json &body)
 {
     /* Remove the addresses prefix to get the address */
-    std::string address = req.path.substr(std::string("/addresses/").size());
+    std::string address = req.matches[1];
 
     if (Error error = validateAddresses({address}, false); error != SUCCESS)
     {
@@ -1019,7 +1019,7 @@ std::tuple<Error, uint16_t> ApiDispatcher::deleteAddress(const httplib::Request 
 std::tuple<Error, uint16_t> ApiDispatcher::deletePreparedTransaction(const httplib::Request &req, httplib::Response &res, const nlohmann::json &body)
 {
     /* Remove the path prefix to get the hash */
-    std::string hashStr = req.path.substr(std::string("/transactions/prepared/").size());
+    std::string hashStr = req.matches[1];
 
     Crypto::Hash hash;
 
@@ -1056,6 +1056,7 @@ std::tuple<Error, uint16_t> ApiDispatcher::resetWallet(const httplib::Request &r
     std::scoped_lock lock(m_mutex);
 
     uint64_t scanHeight = 0;
+
     uint64_t timestamp = 0;
 
     if (body.find("scanHeight") != body.end())
@@ -1149,7 +1150,7 @@ std::tuple<Error, uint16_t>
     ApiDispatcher::getSpendKeys(const httplib::Request &req, httplib::Response &res, const nlohmann::json &body) const
 {
     /* Remove the keys prefix to get the address */
-    std::string address = req.path.substr(std::string("/keys/").size());
+    std::string address = req.matches[1];
 
     if (Error error = validateAddresses({address}, false); error != SUCCESS)
     {
@@ -1175,7 +1176,7 @@ std::tuple<Error, uint16_t>
     ApiDispatcher::getMnemonicSeed(const httplib::Request &req, httplib::Response &res, const nlohmann::json &body) const
 {
     /* Remove the keys prefix to get the address */
-    std::string address = req.path.substr(std::string("/keys/mnemonic/").size());
+    std::string address = req.matches[1];
 
     if (Error error = validateAddresses({address}, false); error != SUCCESS)
     {
@@ -1237,14 +1238,11 @@ std::tuple<Error, uint16_t>
 std::tuple<Error, uint16_t>
     ApiDispatcher::createIntegratedAddress(const httplib::Request &req, httplib::Response &res, const nlohmann::json &body) const
 {
-    std::string stripped = req.path.substr(std::string("/addresses/").size());
-
-    uint64_t splitPos = stripped.find_first_of("/");
-
-    std::string address = stripped.substr(0, splitPos);
+ 
+    std::string address = req.matches[1];
 
     /* Skip the address */
-    std::string paymentID = stripped.substr(splitPos + 1);
+    std::string paymentID = req.matches[2];
 
     const auto [error, integratedAddress] = Utilities::createIntegratedAddress(address, paymentID);
 
@@ -1289,7 +1287,7 @@ std::tuple<Error, uint16_t> ApiDispatcher::getUnconfirmedTransactionsForAddress(
     httplib::Response &res,
     const nlohmann::json &body) const
 {
-    std::string address = req.path.substr(std::string("/transactions/unconfirmed").size());
+    std::string address = req.matches[1];
 
     const auto txs = m_walletBackend->getUnconfirmedTransactions();
 
@@ -1324,7 +1322,7 @@ std::tuple<Error, uint16_t> ApiDispatcher::getTransactionsFromHeight(
     httplib::Response &res,
     const nlohmann::json &body) const
 {
-    std::string startHeightStr = req.path.substr(std::string("/transactions/").size());
+    std::string startHeightStr = req.matches[1];
 
     try
     {
@@ -1357,15 +1355,9 @@ std::tuple<Error, uint16_t> ApiDispatcher::getTransactionsFromHeightToHeight(
     httplib::Response &res,
     const nlohmann::json &body) const
 {
-    std::string stripped = req.path.substr(std::string("/transactions/").size());
+    std::string startHeightStr = req.matches[1];
 
-    uint64_t splitPos = stripped.find_first_of("/");
-
-    /* Take all the chars before the "/", this is our start height */
-    std::string startHeightStr = stripped.substr(0, splitPos);
-
-    /* Take all the chars after the "/", this is our end height */
-    std::string endHeightStr = stripped.substr(splitPos + 1);
+    std::string endHeightStr = req.matches[2];
 
     try
     {
@@ -1406,11 +1398,8 @@ std::tuple<Error, uint16_t> ApiDispatcher::getTransactionsFromHeightWithAddress(
     httplib::Response &res,
     const nlohmann::json &body) const
 {
-    std::string stripped = req.path.substr(std::string("/transactions/address/").size());
 
-    uint64_t splitPos = stripped.find_first_of("/");
-
-    std::string address = stripped.substr(0, splitPos);
+    std::string address = req.matches[1];
 
     if (Error error = validateAddresses({address}, false); error != SUCCESS)
     {
@@ -1418,7 +1407,7 @@ std::tuple<Error, uint16_t> ApiDispatcher::getTransactionsFromHeightWithAddress(
     }
 
     /* Skip the address */
-    std::string startHeightStr = stripped.substr(splitPos + 1);
+    std::string startHeightStr = req.matches[2];
 
     try
     {
@@ -1470,24 +1459,16 @@ std::tuple<Error, uint16_t> ApiDispatcher::getTransactionsFromHeightToHeightWith
 {
     std::string stripped = req.path.substr(std::string("/transactions/address/").size());
 
-    uint64_t splitPos = stripped.find_first_of("/");
-
-    std::string address = stripped.substr(0, splitPos);
+    std::string address = req.matches[1];
 
     if (Error error = validateAddresses({address}, false); error != SUCCESS)
     {
         return {error, 400};
     }
 
-    stripped = stripped.substr(splitPos + 1);
+    std::string startHeightStr = req.matches[2];
 
-    splitPos = stripped.find_first_of("/");
-
-    /* Take all the chars before the "/", this is our start height */
-    std::string startHeightStr = stripped.substr(0, splitPos);
-
-    /* Take all the chars after the "/", this is our end height */
-    std::string endHeightStr = stripped.substr(splitPos + 1);
+    std::string endHeightStr = req.matches[3];
 
     try
     {
@@ -1545,7 +1526,7 @@ std::tuple<Error, uint16_t> ApiDispatcher::getTransactionDetails(
     httplib::Response &res,
     const nlohmann::json &body) const
 {
-    std::string hashStr = req.path.substr(std::string("/transactions/hash/").size());
+    std::string hashStr = req.matches[1];
 
     Crypto::Hash hash;
 
@@ -1588,7 +1569,7 @@ std::tuple<Error, uint16_t> ApiDispatcher::getTransactionsByPaymentId(
     httplib::Response &res,
     const nlohmann::json &body) const
 {
-    std::string paymentID = req.path.substr(std::string("/transactions/paymentid/").size());
+    std::string paymentID = req.matches[1];
 
     std::vector<WalletTypes::Transaction> transactions;
 
@@ -1650,7 +1631,7 @@ std::tuple<Error, uint16_t> ApiDispatcher::getBalanceForAddress(
     httplib::Response &res,
     const nlohmann::json &body) const
 {
-    std::string address = req.path.substr(std::string("/balance/").size());
+    std::string address = req.matches[1];
 
     const auto [error, unlocked, locked] = m_walletBackend->getBalance(address);
 
@@ -1688,7 +1669,7 @@ std::tuple<Error, uint16_t> ApiDispatcher::getTxPrivateKey(
     httplib::Response &res,
     const nlohmann::json &body) const
 {
-    std::string txHashStr = req.path.substr(std::string("/transactions/privatekey/").size());
+    std::string txHashStr = req.matches[1];
 
     Crypto::Hash txHash;
 
