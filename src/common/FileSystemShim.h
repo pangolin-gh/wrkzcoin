@@ -5,11 +5,13 @@
 #pragma once
 
 /* Check if we have the <filesystem> header, or just <experimental/filesystem> */
-#if defined(__cplusplus) && __cplusplus >= 201703L && defined(__has_include) && !defined __ANDROID__
+#if defined(__cplusplus) && defined(__has_include) && !defined __ANDROID__
 #if __has_include(<filesystem>)
-#define GHC_USE_STD_FS
 #include <filesystem>
 namespace fs = std::filesystem;
+#elif __has_include(<experimental/filesystem>)
+#include <experimental/filesystem>
+namespace fs = std::experimental::filesystem;
 #endif
 #endif
 #if defined(__ANDROID__)
