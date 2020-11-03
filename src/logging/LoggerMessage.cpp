@@ -31,7 +31,7 @@ namespace Logging
         }
     }
 
-#if defined __linux__ && !defined __ANDROID__
+#if defined(__linux__) && !defined(__ANDROID__)
 
     LoggerMessage::LoggerMessage(LoggerMessage &&other):
         std::ostream(std::move(other)),
@@ -45,7 +45,8 @@ namespace Logging
     {
         this->set_rdbuf(this);
     }
-#elif defined __linux__ && defined(__ANDROID__)
+#elif defined(__linux__) && defined(__ANDROID__)
+
     LoggerMessage::LoggerMessage(LoggerMessage &&other): 
         std::ostream(std::move(other)),
         std::streambuf(std::move(other)),

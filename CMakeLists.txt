@@ -303,6 +303,12 @@ if (MSVC AND OPENSSL_FOUND AND (("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "Win32")
     SET(OPENSSL_FOUND FALSE)
 endif ()
 
+if (ANDROID)
+    # Disable OPENSSL_FOUND for android first
+    message(STATUS "OpenSSL Found: Disabled ANDROID build.")
+    SET(OPENSSL_FOUND FALSE)
+endif ()
+
 if (OPENSSL_FOUND)
     ## On non MSVC build systems, we need to link ldl with the static OpenSSL library
     if (NOT MSVC)
