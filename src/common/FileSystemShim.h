@@ -5,7 +5,7 @@
 #pragma once
 
 /* Check if we have the <filesystem> header, or just <experimental/filesystem> */
-#if defined(__cplusplus) && defined(__has_include) && !defined __ANDROID__
+#if defined(__cplusplus) && !defined(__ANDROID__)
 #if __has_include(<filesystem>)
 #include <filesystem>
 namespace fs = std::filesystem;
