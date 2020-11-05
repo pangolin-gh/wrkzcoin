@@ -227,7 +227,7 @@ namespace CryptoNote
         /* Add condition to check for max block size */
         if (height >= CryptoNote::parameters::MAX_BLOCK_SIZE_V1_HEIGHT)
         {
-            return std::min(CryptoNote::parameters::MAX_BLOCK_SIZE_V1, maxSize);
+            return std::min<uint64_t>(CryptoNote::parameters::MAX_BLOCK_SIZE_V1, maxSize);
         }
         else
         {

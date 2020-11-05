@@ -111,7 +111,7 @@ namespace Utilities
         const uint64_t y = 125000;
 
         /* Need space for the miner transaction */
-        return std::min(x, y) - CryptoNote::parameters::CRYPTONOTE_COINBASE_BLOB_RESERVED_SIZE;
+        return std::min<uint64_t>(x, y) - CryptoNote::parameters::CRYPTONOTE_COINBASE_BLOB_RESERVED_SIZE;
     }
 
     /* Sleep for approximately duration, unless condition is true. This lets us
