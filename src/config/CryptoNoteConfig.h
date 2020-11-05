@@ -222,6 +222,12 @@ namespace CryptoNote
 
         const size_t MAX_BLOCK_SIZE_INITIAL = 100000;
 
+        /* Increase max block size, we are fee per byte anyways */
+        const uint64_t MAX_BLOCK_SIZE_V1_HEIGHT = 1500000;
+
+        /* What is the max size */
+        const uint64_t MAX_BLOCK_SIZE_V1 = 2097152;
+
         const uint64_t MAX_BLOCK_SIZE_GROWTH_SPEED_NUMERATOR = 100 * 1024;
 
         const uint64_t MAX_BLOCK_SIZE_GROWTH_SPEED_DENOMINATOR = 365 * 24 * 60 * 60 / DIFFICULTY_TARGET;

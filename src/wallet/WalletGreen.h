@@ -132,7 +132,7 @@ namespace CryptoNote
 
         size_t getTxSize(const PreparedTransaction &p);
 
-        size_t getMaxTxSize();
+        uint64_t getMaxTxSize();
 
         PreparedTransaction formTransaction(const TransactionParameters &sendingTransaction);
 

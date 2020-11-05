@@ -4634,7 +4634,7 @@ namespace CryptoNote
        tx sizes, but prevents anything getting stuck in the pool.
 
     */
-    size_t WalletGreen::getMaxTxSize()
+    uint64_t WalletGreen::getMaxTxSize()
     {
         uint32_t currentHeight = m_node.getLastKnownBlockHeight();
 
@@ -4642,7 +4642,15 @@ namespace CryptoNote
 
                         CryptoNote::parameters::MAX_BLOCK_SIZE_GROWTH_SPEED_DENOMINATOR;
 
-        size_t x = CryptoNote::parameters::MAX_BLOCK_SIZE_INITIAL + growth;
+        /* Add condition to check for max block size */
+        size_t maxSize = CryptoNote::parameters::MAX_BLOCK_SIZE_INITIAL;
+
+        if (currentHeight >= CryptoNote::parameters::MAX_BLOCK_SIZE_V1_HEIGHT)
+        {
+            maxSize = CryptoNote::parameters::MAX_BLOCK_SIZE_V1;
+        }
+
+        size_t x = maxSize + growth;
 
         size_t y = 125000;
 

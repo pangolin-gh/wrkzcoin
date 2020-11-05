@@ -98,7 +98,15 @@ namespace Utilities
 
         const uint64_t growth = numerator / denominator;
 
-        const uint64_t x = CryptoNote::parameters::MAX_BLOCK_SIZE_INITIAL + growth;
+        /* Add condition to check for max block size */
+        size_t maxSize = CryptoNote::parameters::MAX_BLOCK_SIZE_INITIAL;
+
+        if (currentHeight >= CryptoNote::parameters::MAX_BLOCK_SIZE_V1_HEIGHT)
+        {
+            maxSize = CryptoNote::parameters::MAX_BLOCK_SIZE_V1;
+        }
+
+        const uint64_t x = maxSize + growth;
 
         const uint64_t y = 125000;
 
