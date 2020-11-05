@@ -227,12 +227,11 @@ namespace CryptoNote
         /* Add condition to check for max block size */
         if (height >= CryptoNote::parameters::MAX_BLOCK_SIZE_V1_HEIGHT)
         {
-            return std::min<uint64_t>(CryptoNote::parameters::MAX_BLOCK_SIZE_V1, maxSize);
+            maxSize = static_cast<size_t>(
+                CryptoNote::parameters::MAX_BLOCK_SIZE_V1
+                + (height * m_maxBlockSizeGrowthSpeedNumerator) / m_maxBlockSizeGrowthSpeedDenominator);
         }
-        else
-        {
-            return maxSize;
-        }
+        return maxSize;
     }
 
     bool Currency::constructMinerTx(

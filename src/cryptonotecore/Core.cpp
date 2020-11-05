@@ -3266,6 +3266,10 @@ namespace CryptoNote
                    we just passed in exceed the maximum size of a block, it won't fit so we'll move on */
                 if (transactionsSize + transaction.getTransactionBinaryArray().size() > maxTotalSize)
                 {
+                    logger(Logging::TRACE) << "Transaction " << transaction.getTransactionHash()
+                                           << " transactionsSize + transaction.getTransactionBinaryArray().size() = " 
+                                           << std::to_string(transactionsSize + transaction.getTransactionBinaryArray().size()) << " is bigger than maxTotalSize: "
+                                           << std::to_string(maxTotalSize);
                     return false;
                 }
 
